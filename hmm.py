@@ -67,7 +67,28 @@ class HongminHMM():
         doc_range = [0, length]
         dataset = bnpy.data.GroupXData(X, doc_range, length, Xprev)
         LP = self.model.calc_local_params(dataset)
-        SS = self.model.get_global_suff_stats(dataset, LP)
-        log_probability = self.model.obsModel.calcMargLik(SS)
+
+        #SS = self.model.get_global_suff_stats(dataset, LP)
+        #log_probability = self.model.obsModel.calcMargLik(SS)
+        
+        log_probability = LP['evidence'] # by HongmiWu 28.07-2017
 
         return log_probability
+
+    def calc_log(self, X):
+        from scipy.misc import logsumexp
+        import ipdb
+        Xprev = X
+        length = len(X)
+        doc_range = [0, length]
+        dataset = bnpy.data.GroupXData(X, doc_range, length, Xprev)
+        LP = self.model.calc_local_params(dataset)
+
+        log = LP['logLik_n']
+        log_curve = [logsumexp(log[i]) for i in range(len(log))]
+        log_curve = np.cumsum(log_curve)
+
+        #SS = self.model.get_global_suff_stats(dataset, LP)
+        #log_probability = self.model.obsModel.calcMargLik(SS)
+
+        return log_curve
